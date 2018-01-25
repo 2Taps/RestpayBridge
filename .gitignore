@@ -1,0 +1,4 @@
+/certs/*
+!/certs/.gitkeep
+/nbproject/*
+/node_modules/*
