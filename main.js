@@ -13,7 +13,7 @@ var clientId = 'restpay-prod-colibri-pc-43';
 var device = awsIot.device({
    keyPath: __dirname+'/certs/d1373834d3-private.pem.key',
   certPath: __dirname+'/certs/d1373834d3-certificate.pem.crt',
-    caPath: __dirname+'/certs/root-CA.crt',
+    caPath: __dirname+'/certs/root-CA.pem',
   clientId: clientId,
       host: 'a3pfvuzbin0ywl.iot.us-east-1.amazonaws.com',
       debug: true
