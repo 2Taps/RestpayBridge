@@ -22,8 +22,12 @@ Instalation on restaurant Windows PC
 
 Auto Updater
 
-    Be careful, the auto updater will stop the app and may lose incoming/processing messages
-    Better to release the updates at morning start
+    IMPORTANT: 
+        You must update package.json with new version otherwise the
+
+    CAREFULL: 
+        The auto updater will stop the app and may lose incoming/processing messages
+        Better to release the updates at morning start
 
 iamrole rule engine aws_iot_prod_colibri_pc_tasks_to_dynamodb
 
