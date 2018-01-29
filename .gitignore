@@ -1,4 +1,5 @@
-/certs/*
-!/certs/.gitkeep
+/credentials/*
+!/credentials/.gitkeep
+!/credentials/.root-CA.pem
 /nbproject/*
 /node_modules/*

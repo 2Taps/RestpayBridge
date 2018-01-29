@@ -1,0 +1,21 @@
+{
+    "name": "RestpayColibriBridge",
+    "version": "1.0.0",
+    "auto-updater": {
+        "repo": "/GuilhermeMoura1/RestpayColibriBridge",
+        "branch": "master"
+    },
+    "keywords": [
+        "util",
+        "functional",
+        "server",
+        "client",
+        "browser"
+    ],
+    "author": "David Azevedo",
+    "contributors": [],
+    "dependencies": {
+        "auto-updater": "^1.0.0",
+        "aws-iot-device-sdk": "^2.2.0"
+    }
+}

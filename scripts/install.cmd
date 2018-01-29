@@ -1,0 +1,11 @@
+@echo off
+SET rootPath="C:\2Taps"
+SET appPath="%rootPath%\RestpayColibriBridge"
+SET updaterPath="%rootPath%\RestpayColibriBridgeAutoUpdate"
+
+mkdir "%updaterPath%"
+copy "%appPath%\scripts\autoupdate.js" "%updaterPath%"
+cd /d "%appPath%"
+npm install aws-iot-device-sdk@2.2.0 auto-updater@1.0.0 && ^
+npm install -g node-windows@0.1.14 && ^
+npm link node-windows
