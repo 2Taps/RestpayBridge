@@ -4,8 +4,8 @@ var autoupdater = new AutoUpdater({
     pathToJson: '',
     autoupdate: true,
     checkgit: false,
-    jsonhost: 'https://github.com/GuilhermeMoura1/RestpayColibriBridge/blob/master/package.json',
-    contenthost: 'https://github.com/GuilhermeMoura1/RestpayColibriBridge/archive/master.zip',
+    jsonhost: 'raw.githubusercontent.com',
+    contenthost: 'codeload.github.com',
     progressDebounce: 0,
     devmode: false
 });
