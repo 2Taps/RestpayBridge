@@ -16,6 +16,7 @@
     "contributors": [],
     "dependencies": {
         "auto-updater": "^1.0.0",
-        "aws-iot-device-sdk": "^2.2.0"
+        "aws-iot-device-sdk": "^2.2.0",
+        "simple-git": "^1.89.0"
     }
 }
