@@ -1,6 +1,8 @@
 const simpleGit = require('simple-git')();
-//simpleGit.pull('origin', 'master', {'--rebase': 'true'});
-
+simpleGit
+    .addRemote('origin', 'https://github.com/GuilhermeMoura1/RestpayColibriBridge.git')
+    .pull('origin', 'master', {'--rebase': 'true'});
+/*
 simpleGit
     .addRemote('origin', 'https://github.com/GuilhermeMoura1/RestpayColibriBridge.git')
     .exec(() => console.log('Starting pull...'))
@@ -10,3 +12,4 @@ simpleGit
         }
     })
     .exec(() => console.log('pull done.'));
+    */
