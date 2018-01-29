@@ -19,17 +19,17 @@ autoupdater.on('check.up-to-date', function(v) {
 });
 autoupdater.on('check.out-dated', function(v_old, v) {
   console.warn("Your version is outdated. " + v_old + " of " + v);
-  autoupdater.fire('download-update'); // If autoupdate: false, you'll have to do this manually.
+  //autoupdater.fire('download-update'); // If autoupdate: false, you'll have to do this manually.
   // Maybe ask if the'd like to download the update.
 });
 autoupdater.on('update.downloaded', function() {
   console.log("Update downloaded and ready for install");
   
-  autoupdater.fire('extract'); // If autoupdate: false, you'll have to do this manually.
+  //autoupdater.fire('extract'); // If autoupdate: false, you'll have to do this manually.
 });
 autoupdater.on('update.not-installed', function() {
   console.log("The Update was already in your folder! It's read for install");
-  autoupdater.fire('extract'); // If autoupdate: false, you'll have to do this manually.
+  //autoupdater.fire('extract'); // If autoupdate: false, you'll have to do this manually.
 });
 autoupdater.on('update.extracted', function() {
   console.log("Update extracted successfully!");
