@@ -1,4 +1,4 @@
-const http = require("https");
+const http = require("http");
 const fs = require('fs');
 const awsIot = require('aws-iot-device-sdk');
 const appPath = __dirname;
@@ -7,7 +7,7 @@ var deviceId = devicePkFile = deviceCertFile = '';
 fs.readdirSync(credPath).forEach(file => {
     var fileExt = file.split('.').pop();
     if(file == 'device-id.txt') {
-       try { deviceId = fs.readFileSync(credPath+'/'+file).toString(); } catch(e) {}
+       try { deviceId = fs.readFileSync(credPath+'/'+file).toString().trim(); } catch(e) {}
     } else if(fileExt == 'key' && file.indexOf('private') != -1) {
         devicePkFile = file;
     } else if(fileExt == 'crt') {
@@ -26,12 +26,12 @@ function execAutoUpdate() {
     require('child_process').execSync(
         "node "+appPath+"/autoupdate.js", 
         function puts(error, stdout, stderr) { 
-            console.log(error);
-            console.log(stdout);
-            console.log(stderr);
-            console.log(stdout.indexOf('RESTART THE APP!'));
+            console.warn(error);
+            console.warn(stdout);
+            console.warn(stderr);
+            console.warn(stdout.indexOf('RESTART THE APP!'));
             if(stdout.indexOf('RESTART THE APP!') != -1) {
-                console.log('Exiting');
+                console.warn('Exiting');
                 process.exit();
             }
         }
@@ -47,8 +47,9 @@ var device = awsIot.device({
       host: 'a3pfvuzbin0ywl.iot.us-east-1.amazonaws.com',
       debug: false
 });
-
+//console.log(deviceId); process.exit();
 var bodyChunks = [];
+var req = reqData = {};
 var body = publishTopic = publishJson = '';
 device.on('connect', function() {
     console.log('connected');
@@ -59,27 +60,40 @@ device.on('connect', function() {
         console.log(payload.toString());
         payload = JSON.parse(payload.toString());
         console.log(payload);
-        console.log(payload.id_user)
-        http.get(payload.uri, function(res) {
-            console.log('STATUS: ' + res.statusCode);
-            console.log('HEADERS: ' + JSON.stringify(res.headers));
-            bodyChunks = [];
-            res.on('data', function(chunk) {
-                bodyChunks.push(chunk);
-            }).on('end', function() {
-                body = Buffer.concat(bodyChunks);
-                console.log('BODY: ' + body);
-                publishJson = JSON.stringify({ 
-                    id_user: String(payload.id_user),
-                    timestamp: String(payload.timestamp),
-                    response: '{"data":{"errors":[{"id":"no_user","message":"Sua sess\u00e3o expirou, para sua seguran\u00e7a por favor fa\u00e7a login novamente."}]}}'//body.toString()
+        console.log(payload.id_user);
+        reqData = payload.colibri_api_req;
+        req = http.request(
+            {
+                method: reqData.method,
+                hostname: 'localhost',
+                port: reqData.port,
+                path: '/'+reqData.version+reqData.uri+'?api_key='+reqData.apikey,
+                auth: reqData.username+':'+reqData.password
+            }, function(res) {
+                console.log(res);
+                console.log('STATUS: ' + res.statusCode);
+                console.log('HEADERS: ' + JSON.stringify(res.headers));
+                bodyChunks = [];
+                res.on('data', function(chunk) {
+                    bodyChunks.push(chunk);
+                }).on('end', function() {
+                    body = Buffer.concat(bodyChunks);
+                    body = body.toString();
+                    console.log('BODY: ' + body);
+                    publishJson = JSON.stringify({ 
+                        id_user: String(payload.id_user),
+                        timestamp: String(payload.timestamp),
+                        response: body
+                    });
+                    publishTopic = (payload.publish_mode == 1)?globalPublishTopic:devicePublishTopic;
+                    device.publish(publishTopic, publishJson);
                 });
-                publishTopic = (payload.publish_mode == 1)?globalPublishTopic:devicePublishTopic;
-                device.publish(publishTopic, publishJson);
-            })
-        }).on('error', function(e) {
-            console.log('ERROR: ' + e.message);
+            }
+        );
+        req.on('error', function(e) {
+            console.log(e);
         });
+        req.end();
     } else if(topic == autoUpdateTopic) {
         execAutoUpdate();
     }
