@@ -26,7 +26,6 @@ function execAutoUpdate() {
     const { exec } = require('child_process');
     exec('node '+appPath+'/autoupdate.js', (err, stdout, stderr) => {
         if (err) { return; }
-        console.log(stdout.toString().indexOf('latest'));
         if(stdout.toString().indexOf('RESTART THE APP!') != -1) {
             process.exit();
         }

@@ -28,10 +28,11 @@ Auto Updater
     There are two methods that the app is updated
         1 - When the file main.js is started
         2 - When you publish any message to the AWS IOT Topic: restpay-prod-colibri-pc-update
-
+            
     CAREFULL: 
         The auto updater will stop the app and may lose incoming/processing messages
         Better to release the updates at morning start
+        Take extra care with the update method 2 above
 
 Instalation on AWS
 
