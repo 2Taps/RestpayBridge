@@ -3,7 +3,7 @@ exec('node '+__dirname+'/autoupdate.js', (err, stdout, stderr) => {
     if (err) { return; } else {
         console.log(stdout.toString());
         if(stdout.toString().indexOf('RESTART THE APP!') != -1) {
-            process.exit();
+            process.exit(); //force app to exit and be restarted by windows service or our custom monitor
         } else {
             const http = require("http");
             const fs = require('fs');
@@ -82,7 +82,7 @@ exec('node '+__dirname+'/autoupdate.js', (err, stdout, stderr) => {
                     });
                     req.end();
                 } else if(topic == autoUpdateTopic) {
-                    process.exit();
+                    process.exit(); //force app to exit and be restarted by windows service or our custom monitor
                 }
             }).on('error', function(error) {
                 throw new Error(error);
