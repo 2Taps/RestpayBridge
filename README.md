@@ -1,5 +1,4 @@
 # RestpayColibriBridge
-
 Dependencies
 
     nodejs 8.9.4 windows
