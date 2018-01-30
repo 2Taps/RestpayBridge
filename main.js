@@ -25,10 +25,13 @@ var autoUpdateTopic = 'restpay-prod-colibri-pc-update';
 function execAutoUpdate() {
     const { exec } = require('child_process');
     exec('node '+appPath+'/autoupdate.js', (err, stdout, stderr) => {
-        if (err) { return; }
-        if(stdout.toString().indexOf('RESTART THE APP!') != -1) {
+        if (err) { return; } else {
             console.log(stdout.toString());
-            process.exit();
+            if(stdout.toString().indexOf('RESTART THE APP!') != -1) {
+                setTimeout(function() {
+                    process.exit();
+                }, 5000);
+            }
         }
     });
 }
