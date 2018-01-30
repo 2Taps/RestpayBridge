@@ -1,8 +1,8 @@
 const http = require("https");
 const fs = require('fs');
 const awsIot = require('aws-iot-device-sdk');
-const dir = __dirname;
-const credPath = dir+'/credentials';
+const appPath = __dirname;
+const credPath = appPath+'/credentials';
 var deviceId = devicePkFile = deviceCertFile = '';
 fs.readdirSync(credPath).forEach(file => {
     var fileExt = file.split('.').pop();
@@ -20,6 +20,20 @@ if(!deviceCertFile) { throw new Error('- Device Certificate file not found.'); }
 
 var globalPublishTopic = 'restpay-prod-colibri-pc-publish';
 var devicePublishTopic = deviceId+'-publish';
+var autoUpdateTopic = 'restpay-prod-colibri-pc-update';
+
+function execAutoUpdate() {
+    require('child_process').execSync(
+        "node "+appPath+"/autoupdate.js", 
+        function puts(error, stdout, stderr) { 
+            console.log(stdout);
+            if(indexOf('RESTART THE APP!') != -1) {
+                process.exit();
+            }
+        }
+    );
+}
+execAutoUpdate();
 
 var device = awsIot.device({
    keyPath: credPath+'/'+devicePkFile,
@@ -62,6 +76,8 @@ device.on('connect', function() {
         }).on('error', function(e) {
             console.log('ERROR: ' + e.message);
         });
+    } else if(topic == autoUpdateTopic) {
+        execAutoUpdate();
     }
 }).on('error', function(error) {
     throw new Error(error);
