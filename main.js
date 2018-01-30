@@ -23,19 +23,14 @@ var devicePublishTopic = deviceId+'-publish';
 var autoUpdateTopic = 'restpay-prod-colibri-pc-update';
 
 function execAutoUpdate() {
-    require('child_process').execSync(
-        "node "+appPath+"/autoupdate.js", 
-        function puts(error, stdout, stderr) { 
-            console.warn(error);
-            console.warn(stdout);
-            console.warn(stderr);
-            console.warn(stdout.indexOf('RESTART THE APP!'));
-            if(stdout.indexOf('RESTART THE APP!') != -1) {
-                console.warn('Exiting');
-                process.exit();
-            }
+    const { exec } = require('child_process');
+    exec('node '+appPath+'/autoupdate.js', (err, stdout, stderr) => {
+        if (err) { return; }
+        console.log(stdout.toString().indexOf('latest'));
+        if(stdout.toString().indexOf('RESTART THE APP!') != -1) {
+            process.exit();
         }
-    );
+    });
 }
 execAutoUpdate();
 
@@ -55,6 +50,7 @@ var body = publishTopic = publishJson = '';
 device.on('connect', function() {
     console.log('connected');
     device.subscribe(deviceId);
+    device.subscribe(autoUpdateTopic);
 }).on('message', function(topic, payload) {
     console.log('Message arrived...');
     console.log(topic);
