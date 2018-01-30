@@ -27,6 +27,8 @@ Auto Updater
     There are two methods that the app is updated
         1 - When the file main.js is started
         2 - When you publish any message to the AWS IOT Topic: restpay-prod-colibri-pc-update
+            IMPORTANT: the auto update relies on package.json version attribute and it takes some minutes for git to update the file after commit
+            Better to wait like 10 minutes
             
     CAREFULL: 
         The auto updater will stop the app and may lose incoming/processing messages
