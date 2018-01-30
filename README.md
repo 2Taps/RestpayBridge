@@ -81,5 +81,3 @@ Instalation on restaurant Windows PC
     - Open Windows Cmd as Administrator
     - run C:\2Taps\RestpayColibriBrige\scripts\install.cmd
 
-
-
