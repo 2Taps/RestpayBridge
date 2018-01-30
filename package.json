@@ -1,6 +1,6 @@
 {
     "name": "RestpayColibriBridge",
-    "version": "1.0.14",
+    "version": "1.0.15",
     "auto-updater": {
         "repo": "GuilhermeMoura1/RestpayColibriBridge",
         "branch": "master"

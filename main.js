@@ -27,6 +27,7 @@ function execAutoUpdate() {
     exec('node '+appPath+'/autoupdate.js', (err, stdout, stderr) => {
         if (err) { return; }
         if(stdout.toString().indexOf('RESTART THE APP!') != -1) {
+            console.log(stdout.toString());
             process.exit();
         }
     });
