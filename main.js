@@ -47,45 +47,41 @@ var device = awsIot.device({
       host: 'a3pfvuzbin0ywl.iot.us-east-1.amazonaws.com',
       debug: false
 });
-//console.log(deviceId); process.exit();
+
 var bodyChunks = [];
 var req = reqData = {};
 var body = publishTopic = publishJson = '';
+
 device.on('connect', function() {
     console.log('connected');
     device.subscribe(deviceId);
 }).on('message', function(topic, payload) {
+    console.log('Message arrived...');
     console.log(topic);
     if(topic == deviceId) {
-        console.log(payload.toString());
         payload = JSON.parse(payload.toString());
         console.log(payload);
-        console.log(payload.id_user);
         reqData = payload.colibri_api_req;
         req = http.request(
             {
                 method: reqData.method,
                 hostname: 'localhost',
                 port: reqData.port,
-                path: '/'+reqData.version+reqData.uri+'?api_key='+reqData.apikey,
+                path: '/'+reqData.version+reqData.uri+'?'+reqData.params,
                 auth: reqData.username+':'+reqData.password
             }, function(res) {
-                console.log(res);
-                console.log('STATUS: ' + res.statusCode);
-                console.log('HEADERS: ' + JSON.stringify(res.headers));
                 bodyChunks = [];
                 res.on('data', function(chunk) {
                     bodyChunks.push(chunk);
                 }).on('end', function() {
                     body = Buffer.concat(bodyChunks);
-                    body = body.toString();
-                    console.log('BODY: ' + body);
                     publishJson = JSON.stringify({ 
                         id_user: String(payload.id_user),
                         timestamp: String(payload.timestamp),
-                        response: body
+                        response: body.toString()
                     });
                     publishTopic = (payload.publish_mode == 1)?globalPublishTopic:devicePublishTopic;
+                    console.log('Republishing to topic: '+publishTopic+'...');
                     device.publish(publishTopic, publishJson);
                 });
             }
