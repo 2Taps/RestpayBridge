@@ -26,8 +26,12 @@ function execAutoUpdate() {
     require('child_process').execSync(
         "node "+appPath+"/autoupdate.js", 
         function puts(error, stdout, stderr) { 
+            console.log(error);
             console.log(stdout);
-            if(indexOf('RESTART THE APP!') != -1) {
+            console.log(stderr);
+            console.log(stdout.indexOf('RESTART THE APP!'));
+            if(stdout.indexOf('RESTART THE APP!') != -1) {
+                console.log('Exiting');
                 process.exit();
             }
         }
