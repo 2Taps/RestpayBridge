@@ -73,7 +73,7 @@ autoupdater
     var body = publishTopic = publishJson = '';
 
     device.on('connect', function() {
-        console.log('connected');
+        console.log('Connected to AWS IOT');
         device.subscribe(deviceId);
         device.subscribe(autoUpdateTopic);
     }).on('message', function(topic, payload) {
