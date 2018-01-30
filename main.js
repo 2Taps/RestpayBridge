@@ -78,9 +78,7 @@ autoupdater
     }).on('message', function(topic, payload) {
         console.log('Message arrived...');
         console.log(topic);
-        //try { wlogger.error('Message arrived...'); } catch(error) {}
         if(topic == deviceId) {
-            //try { wlogger.error(payload.toString()); } catch(error) {}
             payload = JSON.parse(payload.toString());
             console.log(payload);
             reqData = payload.colibri_api_req;
@@ -97,7 +95,6 @@ autoupdater
                         bodyChunks.push(chunk);
                     }).on('end', function() {
                         body = Buffer.concat(bodyChunks);
-                        //try { wlogger.error(body.toString()); } catch(error) {}
                         publishJson = JSON.stringify({ 
                             id_user: String(payload.id_user),
                             timestamp: String(payload.timestamp),

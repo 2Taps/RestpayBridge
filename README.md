@@ -81,4 +81,5 @@ Instalation on restaurant Windows PC
         - Paste private key and certificate obtained from aws iot
     - Open Windows Cmd as Administrator
     - run C:\2Taps\RestpayColibriBrige\install.cmd
-
+        - The last step of this command is to install main.js as a window service
+        - It will prompt you to give some permissions, click yes until no more windows apear asking permissions
