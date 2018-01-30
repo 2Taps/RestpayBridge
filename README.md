@@ -78,5 +78,5 @@ Instalation on restaurant Windows PC
         - Create a file called device-id.txt and paste restpay-prod-colibri-pc-{$id_seller}  <= VARIABLE
         - Paste private key and certificate obtained from aws iot
     - Open Windows Cmd as Administrator
-    - run C:\2Taps\RestpayColibriBrige\scripts\install.cmd
+    - run C:\2Taps\RestpayColibriBrige\install.cmd
 

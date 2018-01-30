@@ -8,6 +8,8 @@ exec('node '+__dirname+'/autoupdate.js', (err, stdout, stderr) => {
             const http = require("http");
             const fs = require('fs');
             const awsIot = require('aws-iot-device-sdk');
+            const EventLogger = require('node-windows').EventLogger;
+            const logger = new EventLogger('Hello World');
             const appPath = __dirname;
             const credPath = appPath+'/credentials';
             var deviceId = devicePkFile = deviceCertFile = '';
@@ -85,6 +87,7 @@ exec('node '+__dirname+'/autoupdate.js', (err, stdout, stderr) => {
                     process.exit(); //force app to exit and be restarted by windows service or our custom monitor
                 }
             }).on('error', function(error) {
+                try { logger.log(error); } catch(error) {}
                 throw new Error(error);
             });
         }
