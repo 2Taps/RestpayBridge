@@ -1,4 +1,12 @@
 const AutoUpdater = require('auto-updater');
+const http = require("http");
+const fs = require('fs');
+const awsIot = require('aws-iot-device-sdk');
+const appPath = __dirname;
+const credPath = appPath+'/credentials';
+const EventLogger = require('node-windows').EventLogger;
+const projectPublicName = fs.readFileSync(appPath+'/project-public-name.txt').toString().trim();
+const wlogger = new EventLogger(projectPublicName);
 
 var autoupdater = new AutoUpdater({
     pathToJson: '',
@@ -19,27 +27,18 @@ autoupdater
 .on('download.start', function(name) { console.log("Starting downloading: " + name); })
 .on('download.progress', function(name, perc) { process.stdout.write("Downloading " + perc + "% \033[0G"); })
 .on('download.end', function(name) { console.log("Downloaded " + name); })
-.on('download.error', function(err) {
-    //try { logger.log(e); } catch(error) {} 
-    console.error(name, e); process.exit();
+.on('download.error', function(e) {
+    try { wlogger.error(e); } catch(error) {} console.error(e); process.exit();
 })
 .on('error', function(name, e) {
-    //try { logger.log(e); } catch(error) {} 
-    console.error(name, e); process.exit();
+    try { wlogger.log(e); } catch(error) {}  console.error(name, e); process.exit();
 })
 .on('update.extracted', function() {
     console.log("Update extracted successfully! Restarting..."); process.exit();
 })
 .on('end', function() {
     console.log("The app is ready to function");
-    
-    const http = require("http");
-    const fs = require('fs');
-    const awsIot = require('aws-iot-device-sdk');
-    //const EventLogger = require('node-windows').EventLogger;
-    //const logger = new EventLogger('Hello World');
-    const appPath = __dirname;
-    const credPath = appPath+'/credentials';
+   
     var deviceId = devicePkFile = deviceCertFile = '';
     fs.readdirSync(credPath).forEach(file => {
         var fileExt = file.split('.').pop();
@@ -79,7 +78,9 @@ autoupdater
     }).on('message', function(topic, payload) {
         console.log('Message arrived...');
         console.log(topic);
+        //try { wlogger.error('Message arrived...'); } catch(error) {}
         if(topic == deviceId) {
+            //try { wlogger.error(payload.toString()); } catch(error) {}
             payload = JSON.parse(payload.toString());
             console.log(payload);
             reqData = payload.colibri_api_req;
@@ -96,6 +97,7 @@ autoupdater
                         bodyChunks.push(chunk);
                     }).on('end', function() {
                         body = Buffer.concat(bodyChunks);
+                        //try { wlogger.error(body.toString()); } catch(error) {}
                         publishJson = JSON.stringify({ 
                             id_user: String(payload.id_user),
                             timestamp: String(payload.timestamp),
@@ -115,7 +117,7 @@ autoupdater
             process.exit(); //force app to exit and be restarted by windows service or our custom monitor
         }
     }).on('error', function(error) {
-        //try { logger.log(error); } catch(error) {}
+        try { wlogger.log(error); } catch(error) {}
         throw new Error(error);
     });
 });

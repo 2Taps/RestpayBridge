@@ -1,3 +1,4 @@
+/daemon/*
 /credentials/*
 !/credentials/.gitkeep
 !/credentials/.root-CA.pem
