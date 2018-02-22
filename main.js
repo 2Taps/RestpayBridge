@@ -68,8 +68,9 @@ autoupdater
     });
 
     var bodyChunks = [];
-    var req = reqData = {};
+    var req = reqData = reqConfig = {};
     var body = publishTopic = publishJson = '';
+    var bodyParams = {};
 
     device.on('connect', function() {
         console.log('Connected to AWS IOT');
@@ -82,14 +83,21 @@ autoupdater
             payload = JSON.parse(payload.toString());
             console.log(payload);
             reqData = payload.colibri_api_req;
-            req = http.request(
-                {
-                    method: reqData.method,
-                    hostname: 'localhost',
-                    port: reqData.port,
-                    path: '/'+reqData.version+reqData.uri+'?'+reqData.params,
-                    auth: reqData.username+':'+reqData.password
-                }, function(res) {
+            reqConfig = {
+                method: reqData.method,
+                hostname: 'localhost',
+                port: reqData.port,
+                path: '/'+reqData.version+reqData.uri+'?'+reqData.header_params,
+                auth: reqData.username+':'+reqData.password
+            };
+            bodyParams = reqData.body_params;
+            if(bodyParams != '') {
+                reqConfig.headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Length': Buffer.byteLength(bodyParams)
+                };
+            }
+            req = http.request(reqConfig, function(res) {
                     bodyChunks = [];
                     res.on('data', function(chunk) {
                         bodyChunks.push(chunk);
@@ -109,6 +117,9 @@ autoupdater
             req.on('error', function(e) {
                 console.log(e);
             });
+            if(bodyParams) {
+                req.write(bodyParams);
+            }
             req.end();
         } else if(topic == autoUpdateTopic) {
             process.exit(); //force app to exit and be restarted by windows service or our custom monitor

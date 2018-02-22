@@ -54,7 +54,7 @@ Instalation on AWS
         - Press Create button located right hand top side. It will travels through "Create A certificate ” screen, select create certificate option
         - Download private key and certificate (not root certificate)
             - A private key: downloaded the file xxxxxxxxx-public.pem.key
-            - A certificate for the thing: downloaded the file xxxxxxxxxx-certificate.pem.crt
+            - A certificate for the thing: downloaded the file xxxxxxxxxx-certificate.pem
         - IMPORTANT : Go back to security / certificates page and activate the certificated
 
     - Create the restaurant pc if not already created (Thing in aws naming)
