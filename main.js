@@ -64,7 +64,7 @@ autoupdater
         caPath: credPath+'/root-CA.pem',
       clientId: config.device_id,
           host: config.endpoint,
-          debug: config.debug
+         debug: config.debug
     });
 
     var bodyChunks = [];
