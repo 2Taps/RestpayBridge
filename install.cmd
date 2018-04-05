@@ -1,6 +1,6 @@
 @echo off
 SET rootPath="C:\2Taps"
-SET appPath="%rootPath%\RestpayColibriBridge"
+SET appPath="%rootPath%\RestpayBridge"
 
 cd /d "%appPath%"
 npm install aws-iot-device-sdk@2.2.0 auto-updater@1.0.0 && ^
