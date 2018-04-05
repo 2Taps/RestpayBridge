@@ -1,22 +1,22 @@
-# RestpayColibriBridge
+# 2Taps API Bridge
 Dependencies
 
     nodejs 8.9.4 windows
     aws-iot-device-sdk@2.2.0
     auto-updater@1.0.0
 
-    AWS Dynamodb table prod_colibri_pc_tasks
+    AWS Dynamodb table {$env}_{$software_id}_pc_tasks
         partition key id_user (string)
         sort key timestamp (string)
-    AWS IOT rule engine rule: restpay_prod_colibri_pc_publish
-        Query statement: SELECT * FROM 'restpay-prod-colibri-pc-publish'
-        Action: Insert a message into a DynamoDB table -> prod_colibri_pc_tasks
+    AWS IOT rule engine rule: restpay_{$env}_{$software_id}_pc_publish
+        Query statement: SELECT * FROM 'restpay-{$env}-{$software_id}-pc-publish'
+        Action: Insert a message into a DynamoDB table -> {$env}_{$software_id}_pc_tasks
             Hashkey: id_user
             Hashkey value: ${id_user}                   (string)
             Range key: timestamp
             Range key value : ${timestamp}              (string)
             Write message data to this column: Payload
-    AWS IOT IAM rule engine role: restpay_prod_colibri_pc_tasks_to_dynamodb
+    AWS IOT IAM rule engine role: restpay_{$env}_{$software_id}_pc_tasks_to_dynamodb
 
 Auto Updater
 
@@ -26,7 +26,7 @@ Auto Updater
 
     There are two methods that the app is updated
         1 - When the file main.js is started
-        2 - When you publish any message to the AWS IOT Topic: restpay-prod-colibri-pc-update
+        2 - When you publish any message to the AWS IOT Topic: restpay-{$env}-{$software_id}-pc-update
             IMPORTANT: the auto update relies on package.json version attribute and it takes some minutes for git to update the file after commit
             Better to wait like 10 minutes
             
@@ -41,7 +41,7 @@ Instalation on AWS
 
     - Create Policy (ONLY IF NOT ALREADY DONE)
         - Go to Security and select option “Create”
-        - Set the name as Restpay-Colibri-Pcs-Iot-Policy
+        - Set the name as Restpay-{$env}-{$software_id}-Pcs-Iot-Policy
         - In Add Statements > Actions, select iot.*
         - In Resource ARN, just add “*”. Then Press “Create”
 
@@ -60,7 +60,7 @@ Instalation on AWS
     - Create the restaurant pc if not already created (Thing in aws naming)
         - Go to Manage, Select things. 
         - Press Create Button from Top right. 
-        - Give a name restpay-prod-colibri-pc-{$id_seller} <= this is a variable get from the main database on table seller)
+        - Give a name restpay-{$env}-{$software_id}-pc-{$id_seller} <= this is a variable get from the main database on table seller)
         - And press “Create Thing”. 
 
     - Linking thing, Certificate and Policy
@@ -74,12 +74,12 @@ Instalation on AWS
 Instalation on restaurant Windows PC
 
     - Download and install nodejs 8.9.4 windows
-    - Download https://github.com/GuilhermeMoura1/RestpayColibriBridge/archive/master.zip
-    - Extract to C:\2Taps\RestpayColibriBrige
-    - In C:\2Taps\RestpayColibriBrige\credentials
-        - Create a file called device-id.txt and paste restpay-prod-colibri-pc-{$id_seller}  <= VARIABLE
+    - Download https://github.com/GuilhermeMoura1/RestpayBridge/archive/master.zip
+    - Extract to C:\2Taps\RestpayBrige
+    - Create a file C:\2Taps\RestpayBridge\config.json following the config.json.dist example/structure
+    - In C:\2Taps\RestpayBrige\credentials
         - Paste private key and certificate obtained from aws iot
     - Open Windows Cmd as Administrator
-    - run C:\2Taps\RestpayColibriBrige\install.cmd
+    - run C:\2Taps\RestpayBrige\install.cmd
         - The last step of this command is to install main.js as a window service
         - It will prompt you to give some permissions, click yes until no more windows apear asking permissions

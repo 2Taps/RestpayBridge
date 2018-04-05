@@ -1,6 +1,7 @@
 const AutoUpdater = require('auto-updater');
 const http = require("http");
 const fs = require('fs');
+const sys = require("sys");
 const awsIot = require('aws-iot-device-sdk');
 const appPath = __dirname;
 const credPath = appPath+'/credentials';
@@ -38,33 +39,32 @@ autoupdater
 })
 .on('end', function() {
     console.log("The app is ready to function");
-   
-    var deviceId = devicePkFile = deviceCertFile = '';
+    var config;
+    var config = fs.readFileSync(appPath+"/config.json", "utf8");
+    sys.puts(JSON.parse(config));
     fs.readdirSync(credPath).forEach(file => {
         var fileExt = file.split('.').pop();
-        if(file == 'device-id.txt') {
-           try { deviceId = fs.readFileSync(credPath+'/'+file).toString().trim(); } catch(e) {}
-        } else if(fileExt == 'key' && file.indexOf('private') != -1) {
-            devicePkFile = file;
+        if(fileExt == 'key' && file.indexOf('private') != -1) {
+            config.device_pk_file = file;
         } else if(fileExt == 'crt') {
-            deviceCertFile = file;
+            config.device_cert_file = file;
         }
     })
-    if(!deviceId) { throw new Error('- Device Id file not found.'); }
-    if(!devicePkFile) { throw new Error('- Device Pk file not found.'); }
-    if(!deviceCertFile) { throw new Error('- Device Certificate file not found.'); }
+    if(!config.device_id) { throw new Error('- Device Id file not found.'); }
+    if(!config.device_pk_file) { throw new Error('- Device Pk file not found.'); }
+    if(!config.device_cert_file) { throw new Error('- Device Certificate file not found.'); }
 
-    var globalPublishTopic = 'restpay-prod-colibri-pc-publish';
-    var devicePublishTopic = deviceId+'-publish';
-    var autoUpdateTopic = 'restpay-prod-colibri-pc-update';
+    var globalPublishTopic = 'restpay-'+config.env+'-'+config.software_id+'-pc-publish';
+    var devicePublishTopic = config.device_id+'-publish';
+    var autoUpdateTopic = 'restpay-'+config.env+'-'+config.software_id+'-pc-update';
 
     var device = awsIot.device({
-       keyPath: credPath+'/'+devicePkFile,
-      certPath: credPath+'/'+deviceCertFile,
+       keyPath: credPath+'/'+config.device_pk_file,
+      certPath: credPath+'/'+config.device_cert_file,
         caPath: credPath+'/root-CA.pem',
-      clientId: deviceId,
-          host: 'a3pfvuzbin0ywl.iot.us-east-1.amazonaws.com',
-          debug: false
+      clientId: config.device_id,
+          host: config.endpoint,
+          debug: config.debug
     });
 
     var bodyChunks = [];
@@ -74,53 +74,58 @@ autoupdater
 
     device.on('connect', function() {
         console.log('Connected to AWS IOT');
-        device.subscribe(deviceId);
+        device.subscribe(config.device_id);
         device.subscribe(autoUpdateTopic);
     }).on('message', function(topic, payload) {
         console.log('Message arrived...');
         console.log(topic);
-        if(topic == deviceId) {
+        if(topic == config.device_id) {
             payload = JSON.parse(payload.toString());
             console.log(payload);
-            reqData = payload.colibri_api_req;
-            reqConfig = {
-                method: reqData.method,
-                hostname: 'localhost',
-                port: reqData.port,
-                path: '/'+reqData.version+reqData.uri+'?'+reqData.header_params,
-                auth: reqData.username+':'+reqData.password
-            };
-            bodyParams = reqData.body_params;
-            if(bodyParams != '') {
-                reqConfig.headers = {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Content-Length': Buffer.byteLength(bodyParams)
-                };
-            }
-            req = http.request(reqConfig, function(res) {
-                    bodyChunks = [];
-                    res.on('data', function(chunk) {
-                        bodyChunks.push(chunk);
-                    }).on('end', function() {
-                        body = Buffer.concat(bodyChunks);
-                        publishJson = JSON.stringify({ 
-                            id_user: String(payload.id_user),
-                            timestamp: String(payload.timestamp),
-                            response: body.toString()
-                        });
-                        publishTopic = (payload.publish_mode == 1)?globalPublishTopic:devicePublishTopic;
-                        console.log('Republishing to topic: '+publishTopic+'...');
-                        device.publish(publishTopic, publishJson);
+            reqData = payload.api_req;
+            //Executing local task via LOCAL REST API CALL
+            if(config.software_id == reqData.software_id) {
+                if(config.software_api_mode == "REST") {
+                    reqConfig = {
+                        method: reqData.method,
+                        hostname: 'localhost',
+                        port: reqData.port,
+                        path: '/'+reqData.version+reqData.uri+'?'+reqData.header_params,
+                        auth: reqData.username+':'+reqData.password
+                    };
+                    bodyParams = reqData.body_params;
+                    if(bodyParams != '') {
+                        reqConfig.headers = {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Content-Length': Buffer.byteLength(bodyParams)
+                        };
+                    }
+                    req = http.request(reqConfig, function(res) {
+                            bodyChunks = [];
+                            res.on('data', function(chunk) {
+                                bodyChunks.push(chunk);
+                            }).on('end', function() {
+                                body = Buffer.concat(bodyChunks);
+                                publishJson = JSON.stringify({ 
+                                    id_user: String(payload.id_user),
+                                    timestamp: String(payload.timestamp),
+                                    response: body.toString()
+                                });
+                                publishTopic = (payload.publish_mode == 1)?globalPublishTopic:devicePublishTopic;
+                                console.log('Republishing to topic: '+publishTopic+'...');
+                                device.publish(publishTopic, publishJson);
+                            });
+                        }
+                    );
+                    req.on('error', function(e) {
+                        console.log(e);
                     });
+                    if(bodyParams) {
+                        req.write(bodyParams);
+                    }
+                    req.end();
                 }
-            );
-            req.on('error', function(e) {
-                console.log(e);
-            });
-            if(bodyParams) {
-                req.write(bodyParams);
             }
-            req.end();
         } else if(topic == autoUpdateTopic) {
             process.exit(); //force app to exit and be restarted by windows service or our custom monitor
         }
