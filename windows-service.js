@@ -7,7 +7,7 @@ const projectPublicName = fs.readFileSync(appPath+'/project-public-name.txt').to
 console.log(projectPublicName);
 var svc = new Service({
     name: projectPublicName,
-    description: 'Consulta a api rest local do colibri para o cloud do app mobile',
+    description: 'Consulta a api local software do restaurante para o cloud do app mobile',
     script: appPath+'/main.js',
     wait: 5,
     grow: 0,
