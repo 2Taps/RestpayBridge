@@ -18,23 +18,6 @@ Dependencies
             Write message data to this column: Payload
     AWS IOT IAM rule engine role: restpay_{$env}_{$software_id}_pc_tasks_to_dynamodb
 
-Auto Updater
-
-    IMPORTANT: 
-        When you are ready to deploy the update
-        You must update package.json with new version otherwise the auto updater will do nothing
-
-    There are two methods that the app is updated
-        1 - When the file main.js is started
-        2 - When you publish any message to the AWS IOT Topic: restpay-{$env}-{$software_id}-pc-update
-            IMPORTANT: the auto update relies on package.json version attribute and it takes some minutes for git to update the file after commit
-            Better to wait like 10 minutes
-            
-    CAREFULL: 
-        The auto updater will stop the app and may lose incoming/processing messages
-        Better to release the updates at morning start
-        Take extra care with the update method 2 above
-
 Instalation on AWS
 
     ------- (ONLY IF NOT ALREADY DONE) ------- 
@@ -83,3 +66,20 @@ Instalation on restaurant Windows PC
     - run C:\2Taps\RestpayBrige\install.cmd
         - The last step of this command is to install main.js as a window service
         - It will prompt you to give some permissions, click yes until no more windows apear asking permissions
+
+Auto Updater
+
+    IMPORTANT: 
+        When you are ready to deploy the update
+        You must update package.json with new version otherwise the auto updater will do nothing
+
+    There are two methods that the app is updated
+        1 - When the file main.js is started
+        2 - When you publish any message to the AWS IOT Topic: restpay-{$env}-{$software_id}-pc-update
+            IMPORTANT: the auto update relies on package.json version attribute and it takes some minutes for git to update the file after commit
+            Better to wait like 10 minutes
+            
+    CAREFULL: 
+        The auto updater will stop the app and may lose incoming/processing messages
+        Better to release the updates at morning start
+        Take extra care with the update method 2 above
