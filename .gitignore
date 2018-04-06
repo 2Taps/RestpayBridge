@@ -1,5 +1,6 @@
 /daemon/*
 /credentials/*
+/config.json
 !/credentials/.gitkeep
 !/credentials/.root-CA.pem
 /nbproject/*
