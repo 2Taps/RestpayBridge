@@ -1,6 +1,6 @@
 {
-    "device_id": "restpay-prod-colibri-pc-43",
-    "software_id": "ncr_colibri",
+    "device_id": "restpay-prod-colibri-pc-1",
+    "software_id": "colibri",
     "software_api_mode": "REST",
     "endpoint": "a3pfvuzbin0ywl.iot.us-east-1.amazonaws.com",
     "env": "prod",

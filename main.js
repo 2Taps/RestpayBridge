@@ -1,7 +1,6 @@
 const AutoUpdater = require('auto-updater');
 const http = require("http");
 const fs = require('fs');
-const sys = require("sys");
 const awsIot = require('aws-iot-device-sdk');
 const appPath = __dirname;
 const credPath = appPath+'/credentials';
@@ -40,8 +39,7 @@ autoupdater
 .on('end', function() {
     console.log("The app is ready to function");
     var config;
-    var config = fs.readFileSync(appPath+"/config.json", "utf8");
-    sys.puts(JSON.parse(config));
+    var config = JSON.parse(fs.readFileSync(appPath+"/config.json", "utf8"));
     fs.readdirSync(credPath).forEach(file => {
         var fileExt = file.split('.').pop();
         if(fileExt == 'key' && file.indexOf('private') != -1) {
