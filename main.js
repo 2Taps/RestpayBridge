@@ -129,7 +129,7 @@ autoupdater
         }
     }).on('error', function(error) {
         try { wlogger.log(error); } catch(error) {}
-        throw new Error(error);
+        //throw new Error(error);
     });
 });
 // Start checking
