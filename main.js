@@ -1,5 +1,6 @@
 const AutoUpdater = require('auto-updater');
 const http = require("http");
+const https = require("https");
 const fs = require('fs');
 const awsIot = require('aws-iot-device-sdk');
 const appPath = __dirname;
@@ -66,7 +67,8 @@ autoupdater
     });
 
     var bodyChunks = [];
-    var req = reqData = reqConfig = {};
+    var req = reqConfig = {};
+    var httpModule;
     var body = publishTopic = publishJson = '';
     var bodyParams = {};
 
@@ -80,41 +82,30 @@ autoupdater
         if(topic == config.device_id) {
             payload = JSON.parse(payload.toString());
             console.log(payload);
-            reqData = payload.api_req;
             //Executing local task via LOCAL REST API CALL
-            if(config.software_id == reqData.software_id) {
+            if(config.software_id == payload.software_id) {
                 if(config.software_api_mode == "REST") {
-                    reqConfig = {
-                        method: reqData.method,
-                        hostname: 'localhost',
-                        port: reqData.port,
-                        path: '/'+reqData.version+reqData.uri+'?'+reqData.header_params,
-                        auth: reqData.username+':'+reqData.password
-                    };
-                    bodyParams = reqData.body_params;
+                    bodyParams = payload.req_body_params;
                     if(bodyParams != '') {
-                        reqConfig.headers = {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'Content-Length': Buffer.byteLength(bodyParams)
-                        };
+                        payload.req_config['Content-Length'] = Buffer.byteLength(bodyParams);
                     }
-                    req = http.request(reqConfig, function(res) {
-                            bodyChunks = [];
-                            res.on('data', function(chunk) {
-                                bodyChunks.push(chunk);
-                            }).on('end', function() {
-                                body = Buffer.concat(bodyChunks);
-                                publishJson = JSON.stringify({ 
-                                    id_user: String(payload.id_user),
-                                    timestamp: String(payload.timestamp),
-                                    response: body.toString()
-                                });
-                                publishTopic = (payload.publish_mode == 1)?globalPublishTopic:devicePublishTopic;
-                                console.log('Republishing to topic: '+publishTopic+'...');
-                                device.publish(publishTopic, publishJson);
+                    httpModule = (payload.req_protocol == 'http')?http:https;
+                    req = httpModule.request(payload.req_config, function(res) {
+                        bodyChunks = [];
+                        res.on('data', function(chunk) {
+                            bodyChunks.push(chunk);
+                        }).on('end', function() {
+                            body = Buffer.concat(bodyChunks);
+                            publishJson = JSON.stringify({ 
+                                id_user: String(payload.id_user),
+                                timestamp: String(payload.timestamp),
+                                response: body.toString()
                             });
-                        }
-                    );
+                            publishTopic = (payload.publish_mode == 1)?globalPublishTopic:devicePublishTopic;
+                            console.log('Republishing to topic: '+publishTopic+'...');
+                            device.publish(publishTopic, publishJson);
+                        });
+                    });
                     req.on('error', function(e) {
                         console.log(e);
                     });
