@@ -9,6 +9,20 @@ const EventLogger = require('node-windows').EventLogger;
 const projectPublicName = fs.readFileSync(appPath+'/project-public-name.txt').toString().trim();
 const wlogger = new EventLogger(projectPublicName);
 
+function logError(errorTitle, error, throwError) {
+    var errorString;
+    if(typeof error !== 'undefined' && error !== false && typeof error === 'object') {
+        errorString = '- '+errorTitle+' :: '+error.message+' :: '+error.stack;
+    } else {
+        errorString = '- '+errorTitle;
+    }
+    try { console.log(errorString); } catch(error) {}
+    try { wlogger.log(errorString); } catch(error) {}
+    if(throwError === true) {
+        throw new Error(errorString);
+    }
+}
+
 var autoupdater = new AutoUpdater({
     pathToJson: '',
     autoupdate: true,
@@ -29,99 +43,114 @@ autoupdater
 .on('download.progress', function(name, perc) { process.stdout.write("Downloading " + perc + "% \033[0G"); })
 .on('download.end', function(name) { console.log("Downloaded " + name); })
 .on('download.error', function(e) {
-    try { wlogger.error(e); } catch(error) {} console.error(e); process.exit();
+    logError('Error on download version', e); process.exit();
 })
 .on('error', function(name, e) {
-    try { wlogger.log(e); } catch(error) {}  console.error(name, e); process.exit();
+    logError('Error on auto update', e); process.exit();
 })
 .on('update.extracted', function() {
-    console.log("Update extracted successfully! Restarting..."); process.exit();
+    logError('Error on auto update'); process.exit();
 })
 .on('end', function() {
-    console.log("The app is ready to function");
-    var config;
-    var config = JSON.parse(fs.readFileSync(appPath+"/config.json", "utf8"));
-    fs.readdirSync(credPath).forEach(file => {
-        var fileExt = file.split('.').pop();
-        if(fileExt == 'key' && file.indexOf('private') != -1) {
-            config.device_pk_file = file;
-        } else if(fileExt == 'crt') {
-            config.device_cert_file = file;
-        }
-    })
-    if(!config.device_id) { throw new Error('- Device Id file not found.'); }
-    if(!config.device_pk_file) { throw new Error('- Device Pk file not found.'); }
-    if(!config.device_cert_file) { throw new Error('- Device Certificate file not found.'); }
-
-    var globalPublishTopic = 'restpay-'+config.env+'-'+config.software_id+'-pc-publish';
-    var devicePublishTopic = config.device_id+'-publish';
-    var autoUpdateTopic = 'restpay-'+config.env+'-'+config.software_id+'-pc-update';
-
-    var device = awsIot.device({
-       keyPath: credPath+'/'+config.device_pk_file,
-      certPath: credPath+'/'+config.device_cert_file,
-        caPath: credPath+'/root-CA.pem',
-      clientId: config.device_id,
-          host: config.endpoint,
-         debug: config.debug
-    });
-
-    var bodyChunks = [];
-    var req = reqConfig = {};
-    var httpModule;
-    var body = publishTopic = publishJson = '';
-    var bodyParams = {};
-
-    device.on('connect', function() {
-        console.log('Connected to AWS IOT');
-        device.subscribe(config.device_id);
-        device.subscribe(autoUpdateTopic);
-    }).on('message', function(topic, payload) {
-        console.log('Message arrived...');
-        console.log(topic);
-        if(topic == config.device_id) {
-            payload = JSON.parse(payload.toString());
-            console.log(payload);
-            //Executing local task via LOCAL REST API CALL
-            if(config.software_id == payload.software_id) {
-                if(config.software_api_mode == "REST") {
-                    bodyParams = payload.req_body_params;
-                    if(bodyParams != '') {
-                        payload.req_config['Content-Length'] = Buffer.byteLength(bodyParams);
-                    }
-                    httpModule = (payload.req_protocol == 'http')?http:https;
-                    req = httpModule.request(payload.req_config, function(res) {
-                        bodyChunks = [];
-                        res.on('data', function(chunk) {
-                            bodyChunks.push(chunk);
-                        }).on('end', function() {
-                            body = Buffer.concat(bodyChunks);
-                            publishJson = JSON.stringify({ 
-                                id_user: String(payload.id_user),
-                                timestamp: String(payload.timestamp),
-                                response: body.toString()
-                            });
-                            publishTopic = (payload.publish_mode == 1)?globalPublishTopic:devicePublishTopic;
-                            console.log('Republishing to topic: '+publishTopic+'...');
-                            device.publish(publishTopic, publishJson);
-                        });
-                    });
-                    req.on('error', function(e) {
-                        console.log(e);
-                    });
-                    if(bodyParams) {
-                        req.write(bodyParams);
-                    }
-                    req.end();
-                }
+    try {
+        console.log("The app is ready to function");
+        var config;
+        var config = JSON.parse(fs.readFileSync(appPath+"/config.json", "utf8"));
+        fs.readdirSync(credPath).forEach(file => {
+            var fileExt = file.split('.').pop();
+            if(fileExt == 'key' && file.indexOf('private') != -1) {
+                config.device_pk_file = file;
+            } else if(fileExt == 'crt') {
+                config.device_cert_file = file;
             }
-        } else if(topic == autoUpdateTopic) {
-            process.exit(); //force app to exit and be restarted by windows service or our custom monitor
-        }
-    }).on('error', function(error) {
-        try { wlogger.log(error); } catch(error) {}
-        //throw new Error(error);
-    });
+        })
+        if(!config.device_id) { logError('Device Id file not found.', false, true); }
+        if(!config.device_pk_file) { logError('Device Pk file not found.', false, true); }
+        if(!config.device_cert_file) { logError('Device Certificate file not found.', false, true); }
+
+        var globalPublishTopic = 'restpay-'+config.env+'-'+config.software_id+'-pc-publish';
+        var devicePublishTopic = config.device_id+'-publish';
+        var autoUpdateTopic = 'restpay-'+config.env+'-'+config.software_id+'-pc-update';
+
+        var device = awsIot.device({
+           keyPath: credPath+'/'+config.device_pk_file,
+          certPath: credPath+'/'+config.device_cert_file,
+            caPath: credPath+'/root-CA.pem',
+          clientId: config.device_id,
+              host: config.endpoint,
+             debug: config.debug
+        });
+
+        var bodyChunks = [];
+        var req = reqConfig = {};
+        var httpModule;
+        var body = publishTopic = publishJson = '';
+        var bodyParams = {};
+
+        device.on('connect', function() {
+            console.log('Connected to AWS IOT');
+            device.subscribe(config.device_id);
+            device.subscribe(autoUpdateTopic);
+        }).on('message', function(topic, payload) {
+            try {
+                console.log('Message arrived...');
+                console.log(topic);
+                if(topic == config.device_id) {
+                    payload = JSON.parse(payload.toString());
+                    console.log(payload);
+                    //Executing local task via LOCAL REST API CALL
+                    if(config.software_id == payload.software_id) {
+                        if(config.software_api_mode == "REST") {
+                            try {
+                                bodyParams = payload.req_body_params;
+                                if(bodyParams != '') {
+                                    payload.req_config['Content-Length'] = Buffer.byteLength(bodyParams);
+                                }
+                                httpModule = (payload.req_protocol == 'http')?http:https;
+                                req = httpModule.request(payload.req_config, function(res) {
+                                    bodyChunks = [];
+                                    res.on('data', function(chunk) {
+                                        bodyChunks.push(chunk);
+                                    }).on('end', function() {
+                                        body = Buffer.concat(bodyChunks);
+                                        publishJson = JSON.stringify({ 
+                                            id_user: String(payload.id_user),
+                                            timestamp: String(payload.timestamp),
+                                            response: body.toString()
+                                        });
+                                        publishTopic = (payload.publish_mode == 1)?globalPublishTopic:devicePublishTopic;
+                                        console.log('Republishing to topic: '+publishTopic+'...');
+                                        device.publish(publishTopic, publishJson);
+                                    });
+                                });
+                                req.on('error', function(error) {
+                                    logError('Error on REST Request execution', error);
+                                });
+                                if(bodyParams) {
+                                    req.write(bodyParams);
+                                }
+                                req.end();
+                            } catch(error) {
+                                logError('Error on REST Request exec', error);
+                            }
+                        }
+                    }
+                } else if(topic == autoUpdateTopic) {
+                    process.exit(); //force app to exit and be restarted by windows service or our custom monitor
+                }
+            } catch(error) {
+                logError('Error on IOT Message Process', error);
+            }
+        }).on('error', function(error) {
+            logError('Error on IOT Message Receive', error);
+        });
+    } catch(error) {
+        logError('Error on autoupdater end (main code)', error);
+    }
 });
 // Start checking
-autoupdater.fire('check');
+try {
+    autoupdater.fire('check');
+} catch(error) {
+    logError('Error on autoupdater fire', error);
+}
