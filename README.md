@@ -5,6 +5,7 @@ Dependencies
     aws-iot-device-sdk@2.2.0
     auto-updater@1.0.0
 
+    AWS IOT IAM rule engine role: restpay_{$env}_pc_tasks_to_dynamodb
     AWS Dynamodb table restpay_{$env}_pc_tasks
         partition key id_user (string)
         sort key timestamp (string)
@@ -16,7 +17,7 @@ Dependencies
             Range key: timestamp
             Range key value : ${timestamp}              (string)
             Write message data to this column: Payload
-    AWS IOT IAM rule engine role: restpay_{$env}_pc_tasks_to_dynamodb
+    
 
 Instalation on AWS
 
