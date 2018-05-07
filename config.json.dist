@@ -1,5 +1,5 @@
 {
-    "device_id": "restpay-prod-colibri-pc-1",
+    "device_id": "restpay_prod_pc_1",
     "software_id": "colibri",
     "software_api_mode": "REST",
     "endpoint": "a3pfvuzbin0ywl.iot.us-east-1.amazonaws.com",

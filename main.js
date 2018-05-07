@@ -68,10 +68,10 @@ autoupdater
         if(!config.device_pk_file) { logError('Device Pk file not found.', false, true); }
         if(!config.device_cert_file) { logError('Device Certificate file not found.', false, true); }
 
-        var globalPublishTopic = 'restpay-'+config.env+'-'+config.software_id+'-pc-publish';
-        var devicePublishTopic = config.device_id+'-publish';
-        var autoUpdateTopic = 'restpay-'+config.env+'-'+config.software_id+'-pc-update';
-
+        var globalPublishTopic = 'restpay_'+config.env+'_pc_publish';
+        var devicePublishTopic = config.device_id+'_publish';
+        var autoUpdateTopic = 'restpay_'+config.env+'_pc_update';
+_
         var device = awsIot.device({
            keyPath: credPath+'/'+config.device_pk_file,
           certPath: credPath+'/'+config.device_cert_file,

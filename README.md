@@ -5,18 +5,18 @@ Dependencies
     aws-iot-device-sdk@2.2.0
     auto-updater@1.0.0
 
-    AWS Dynamodb table {$env}_{$software_id}_pc_tasks
+    AWS Dynamodb table restpay_{$env}_pc_tasks
         partition key id_user (string)
         sort key timestamp (string)
-    AWS IOT rule engine rule: restpay_{$env}_{$software_id}_pc_publish
-        Query statement: SELECT * FROM 'restpay-{$env}-{$software_id}-pc-publish'
-        Action: Insert a message into a DynamoDB table -> {$env}_{$software_id}_pc_tasks
+    AWS IOT rule engine rule: restpay_{$env}_pc_publish
+        Query statement: SELECT * FROM 'restpay_{$env}_pc_publish'
+        Action: Insert a message into a DynamoDB table -> restpay_{$env}_pc_tasks
             Hashkey: id_user
             Hashkey value: ${id_user}                   (string)
             Range key: timestamp
             Range key value : ${timestamp}              (string)
             Write message data to this column: Payload
-    AWS IOT IAM rule engine role: restpay_{$env}_{$software_id}_pc_tasks_to_dynamodb
+    AWS IOT IAM rule engine role: restpay_{$env}_pc_tasks_to_dynamodb
 
 Instalation on AWS
 
@@ -24,7 +24,7 @@ Instalation on AWS
 
     - Create Policy (ONLY IF NOT ALREADY DONE)
         - Go to Security and select option “Create”
-        - Set the name as Restpay-{$env}-{$software_id}-Pcs-Iot-Policy
+        - Set the name as Restpay_{$env}_Pcs_Iot_Policy
         - In Add Statements > Actions, select iot.*
         - In Resource ARN, just add “*”. Then Press “Create”
 
@@ -43,7 +43,7 @@ Instalation on AWS
     - Create the restaurant pc if not already created (Thing in aws naming)
         - Go to Manage, Select things. 
         - Press Create Button from Top right. 
-        - Give a name restpay-{$env}-{$software_id}-pc-{$id_seller} <= this is a variable get from the main database on table seller)
+        - Give a name restpay_{$env}_pc_{$id_seller} <= this is a variable get from the main database on table seller)
         - And press “Create Thing”. 
 
     - Linking thing, Certificate and Policy
@@ -75,7 +75,7 @@ Auto Updater
 
     There are two methods that the app is updated
         1 - When the file main.js is started
-        2 - When you publish any message to the AWS IOT Topic: restpay-{$env}-{$software_id}-pc-update
+        2 - When you publish any message to the AWS IOT Topic: restpay_{$env}_pc_update
             IMPORTANT: the auto update relies on package.json version attribute and it takes some minutes for git to update the file after commit
             Better to wait like 10 minutes
             
