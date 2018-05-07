@@ -71,7 +71,7 @@ autoupdater
         var globalPublishTopic = 'restpay_'+config.env+'_pc_publish';
         var devicePublishTopic = config.device_id+'_publish';
         var autoUpdateTopic = 'restpay_'+config.env+'_pc_update';
-_
+
         var device = awsIot.device({
            keyPath: credPath+'/'+config.device_pk_file,
           certPath: credPath+'/'+config.device_cert_file,
