@@ -25,7 +25,7 @@ Instalation on AWS
 
     - Create Policy (ONLY IF NOT ALREADY DONE)
         - Go to Security and select option “Create”
-        - Set the name as Restpay_{$env}_Pcs_Iot_Policy
+        - Set the name as restpay_{$env}_pcs_iot_policy
         - In Add Statements > Actions, select iot.*
         - In Resource ARN, just add “*”. Then Press “Create”
 
