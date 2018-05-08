@@ -2,6 +2,6 @@
 /credentials/*
 /config.json
 !/credentials/.gitkeep
-!/credentials/.root-CA.pem
+!/credentials/root-CA.pem
 /nbproject/*
 /node_modules/*
