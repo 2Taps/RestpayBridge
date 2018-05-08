@@ -2,11 +2,12 @@ const AutoUpdater = require('auto-updater');
 const http = require("http");
 const https = require("https");
 const fs = require('fs');
+const path = require('path');
 const awsIot = require('aws-iot-device-sdk');
 const appPath = __dirname;
-const credPath = appPath+'/credentials';
+const credPath = path.join(appPath, 'credentials');
 const EventLogger = require('node-windows').EventLogger;
-const projectPublicName = fs.readFileSync(appPath+'/project-public-name.txt').toString().trim();
+const projectPublicName = fs.readFileSync(path.join(appPath, 'project-public-name.txt')).toString().trim();
 const wlogger = new EventLogger(projectPublicName);
 
 function logError(errorTitle, error, throwError) {
@@ -55,7 +56,7 @@ autoupdater
     try {
         console.log("The app is ready to function");
         var config;
-        var config = JSON.parse(fs.readFileSync(appPath+"/config.json", "utf8"));
+        var config = JSON.parse(fs.readFileSync(path.join(appPath, "config.json"), "utf8"));
         fs.readdirSync(credPath).forEach(file => {
             var fileExt = file.split('.').pop();
             if(fileExt == 'key' && file.indexOf('private') != -1) {
@@ -73,9 +74,9 @@ autoupdater
         var autoUpdateTopic = 'restpay_'+config.env+'_pc_update';
 
         var device = awsIot.device({
-           keyPath: credPath+'/'+config.device_pk_file,
-          certPath: credPath+'/'+config.device_cert_file,
-            caPath: credPath+'/root-CA.pem',
+           keyPath: path.join(credPath, config.device_pk_file),
+          certPath: path.join(credPath, config.device_cert_file),
+            caPath: path.join(credPath, 'root-CA.pem'),
           clientId: config.device_id,
               host: config.endpoint,
              debug: config.debug
