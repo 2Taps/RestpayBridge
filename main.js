@@ -105,7 +105,7 @@ autoupdater
                             try {
                                 bodyParams = payload.req_body_params;
                                 if(bodyParams != '') {
-                                    payload.req_config['Content-Length'] = Buffer.byteLength(bodyParams);
+                                    payload.req_config['headers']['Content-Length'] = Buffer.byteLength(bodyParams);
                                 }
                                 httpModule = (payload.req_protocol == 'http')?http:https;
                                 req = httpModule.request(payload.req_config, function(res) {
