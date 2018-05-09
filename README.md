@@ -1,7 +1,7 @@
 # 2Taps API Bridge
 Dependencies
 
-    nodejs 8.9.4 windows
+    nodejs 8.9.4 windows x64 :: https://nodejs.org/download/release/v8.9.4/node-v8.9.4-x64.msi
     aws-iot-device-sdk@2.2.0
     auto-updater@1.0.0
 
